@@ -1,0 +1,47 @@
+<p id="notice"><%= notice %></p>
+
+<div class="row">
+	<div class="col-xs-4">
+		<%= image_tag @user.image.url(:medium) %>
+		<h3><%= @user.name %></h3>
+		<h5><%= @user.username %></h5>
+		<p><%= @user.bio %></p>
+		<p><%= @user.location %></p>
+		<p>Joined on <%= @user.created_at.strftime("%B %Y") %></p>
+		<%= @user.relationships.count %> Following <br>
+		<% @user.relationships.each do |relationship| %>
+		<%= link_to relationship.friend.name, profiles_path(relationship.friend)%>
+		<% end %>
+
+		<br>
+		<br>
+
+		<%= pluralize(@user.inverse_relationships.count, "Follower") %>
+		<br>
+		<% @user.inverse_friends.each do |friend| %>
+		<%= link_to friend.name, profile_path(friend) %>
+		<br>
+		<% end %>
+	</div>
+	<div class="col-xs-7">
+		<div class="panel panel-default">
+			<% @user.tweets.each do |tweet| %>
+			<div class="panel-body">
+				<strong><%= tweet.user.username %></strong><small> tweeted <%= time_ago_in_words(tweet.created_at) %> ago </small><br><br>
+				<%= tweet.message %>
+			</div>
+			<% end %>
+		</div>
+	</div>
+</div>
+
+<% if current_user.id == @user.id %>
+<p><%= link_to "All Users", profiles_path %></p>
+<% else %>
+
+	<% if current_user.friends.include?(@user) %>
+		<%= link_to "Unfollow", relationships_path(current_user.relationships.find_by_friend_id(@user)), :method => :delete %>
+	<% else %>
+	<%= link_to "Follow", relationships_path(:friend_id => @user), method: :post %>
+	<% end %>
+<% end %>
